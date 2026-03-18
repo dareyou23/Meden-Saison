@@ -1,0 +1,219 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: AWS::Serverless-2016-10-31
+Description: Meden-Saison Backend - Spielerverfügbarkeit
+
+Parameters:
+  AllowedOrigin:
+    Type: String
+    Default: '*'
+    Description: Allowed CORS origin
+
+Globals:
+  Function:
+    Timeout: 30
+    Runtime: nodejs22.x
+    MemorySize: 256
+    Environment:
+      Variables:
+        TABLE_NAME: !Ref MedenSaisonTable
+        CORS_ORIGIN: !Ref AllowedOrigin
+    Architectures:
+      - arm64
+
+Resources:
+  # DynamoDB Table
+  MedenSaisonTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: MedenSaison
+      BillingMode: PAY_PER_REQUEST
+      PointInTimeRecoverySpecification:
+        PointInTimeRecoveryEnabled: true
+      AttributeDefinitions:
+        - AttributeName: PK
+          AttributeType: S
+        - AttributeName: SK
+          AttributeType: S
+        - AttributeName: GSI1PK
+          AttributeType: S
+        - AttributeName: GSI1SK
+          AttributeType: S
+      KeySchema:
+        - AttributeName: PK
+          KeyType: HASH
+        - AttributeName: SK
+          KeyType: RANGE
+      GlobalSecondaryIndexes:
+        - IndexName: GSI1
+          KeySchema:
+            - AttributeName: GSI1PK
+              KeyType: HASH
+            - AttributeName: GSI1SK
+              KeyType: RANGE
+          Projection:
+            ProjectionType: ALL
+
+  # API Gateway
+  MedenSaisonApi:
+    Type: AWS::Serverless::Api
+    Properties:
+      StageName: prod
+      Cors:
+        AllowMethods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        AllowHeaders: "'Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+        AllowOrigin: "'*'"
+        AllowCredentials: false
+        MaxAge: "'600'"
+      GatewayResponses:
+        DEFAULT_4XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        DEFAULT_5XX:
+          ResponseParameters:
+            Headers:
+              Access-Control-Allow-Origin: "'*'"
+              Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,X-Api-Key,X-Amz-Security-Token'"
+              Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+
+  # Lambda Functions
+
+  # GET /spieltage
+  ListSpieltageFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/spieltage.listSpieltage
+      Events:
+        ListSpieltage:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /spieltage
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # GET /spieler
+  ListSpielerFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/spieler.listSpieler
+      Events:
+        ListSpieler:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /spieler
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # POST /verfuegbarkeit
+  SetVerfuegbarkeitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/verfuegbarkeit.setVerfuegbarkeit
+      Events:
+        SetVerfuegbarkeit:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /verfuegbarkeit
+            Method: post
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # GET /verfuegbarkeit/{spieltagId}
+  GetVerfuegbarkeitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/verfuegbarkeit.getVerfuegbarkeit
+      Events:
+        GetVerfuegbarkeit:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /verfuegbarkeit/{spieltagId}
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # GET /verfuegbarkeit/alle
+  GetAllVerfuegbarkeitFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/verfuegbarkeit.getAllVerfuegbarkeit
+      Events:
+        GetAllVerfuegbarkeit:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /verfuegbarkeit/alle
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # S3 Backup Bucket
+  BackupBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Sub "meden-saison-backups-${AWS::AccountId}"
+      LifecycleConfiguration:
+        Rules:
+          - Id: DeleteOldDailyBackups
+            Prefix: daily/
+            Status: Enabled
+            ExpirationInDays: 35
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+
+  # Tägliches Backup (03:00 UTC = 04:00/05:00 MEZ/MESZ)
+  BackupFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/backup.handler
+      Timeout: 120
+      MemorySize: 512
+      Environment:
+        Variables:
+          TABLE_NAME: !Ref MedenSaisonTable
+          BACKUP_BUCKET: !Ref BackupBucket
+      Events:
+        DailySchedule:
+          Type: Schedule
+          Properties:
+            Schedule: cron(0 3 * * ? *)
+            Description: Tägliches Backup MedenSaison
+            Enabled: true
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+        - S3CrudPolicy:
+            BucketName: !Ref BackupBucket
+
+Outputs:
+  ApiUrl:
+    Description: API Gateway URL
+    Value: !Sub "https://${MedenSaisonApi}.execute-api.${AWS::Region}.amazonaws.com/prod/"
+  TableName:
+    Description: DynamoDB Table Name
+    Value: !Ref MedenSaisonTable
+  BackupBucketName:
+    Description: S3 Backup Bucket
+    Value: !Ref BackupBucket

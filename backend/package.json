@@ -1,0 +1,24 @@
+{
+  "name": "meden-saison-backend",
+  "version": "1.0.0",
+  "description": "Backend für Meden-Saison Spielerverfügbarkeit",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc && cp package.json dist/ && echo deploy-trigger: $(date +%s) > dist/deploy-trigger.txt",
+    "watch": "tsc -w",
+    "clean": "rm -rf dist"
+  },
+  "dependencies": {
+    "@aws-sdk/client-dynamodb": "^3.600.0",
+    "@aws-sdk/client-s3": "^3.600.0",
+    "@aws-sdk/lib-dynamodb": "^3.600.0",
+    "uuid": "^9.0.1",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/aws-lambda": "^8.10.138",
+    "@types/node": "^20.12.0",
+    "@types/uuid": "^9.0.8",
+    "typescript": "^5.4.0"
+  }
+}
