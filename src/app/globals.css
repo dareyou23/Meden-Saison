@@ -1,3 +1,32 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  body {
+    @apply antialiased;
+  }
+}
+
+@layer components {
+  .card {
+    @apply bg-dove-500 rounded-2xl shadow-card
+           border border-dove-400/30 border-t-dove-400/50
+           transition-all duration-200;
+  }
+  .card-clickable {
+    @apply card cursor-pointer
+           hover:bg-dove-400 hover:shadow-card-hover hover:border-dove-300/50 hover:-translate-y-0.5
+           active:shadow-btn-active active:translate-y-0;
+  }
+  .status-btn {
+    @apply flex-1 py-3 rounded-xl text-sm font-bold 
+           shadow-btn border border-transparent
+           transition-all duration-150 cursor-pointer
+           hover:shadow-btn-hover hover:-translate-y-0.5
+           active:shadow-btn-active active:translate-y-0;
+  }
+  .badge {
+    @apply inline-flex items-center px-2.5 py-1 rounded-lg text-xs font-bold;
+  }
+}

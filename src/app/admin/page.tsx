@@ -19,7 +19,7 @@ function formatDatum(iso: string) {
 type AllVerfuegbarkeiten = Record<string, Record<string, Verfuegbarkeit>>;
 
 const STATUS_ICON: Record<string, string> = { ja: '✅', nein: '❌', unsicher: '❓', '': '—' };
-const STATUS_BG: Record<string, string> = { ja: 'bg-green-100', nein: 'bg-red-100', unsicher: 'bg-yellow-100', '': '' };
+const STATUS_BG: Record<string, string> = { ja: 'bg-accent-green/10', nein: 'bg-accent-red/10', unsicher: 'bg-accent-yellow/10', '': '' };
 
 export default function AdminPage() {
   const [spieltage, setSpieltage] = useState<Spieltag[]>([]);
@@ -46,14 +46,18 @@ export default function AdminPage() {
     load();
   }, []);
 
-  if (!loaded) return <div className="text-center py-12 text-gray-500">Laden...</div>;
+  if (!loaded) return (
+    <div className="flex items-center justify-center py-20">
+      <div className="w-8 h-8 border-2 border-accent-cyan border-t-transparent rounded-full animate-spin" />
+    </div>
+  );
 
   if (!authorized) {
     return (
-      <div className="text-center py-12">
-        <p className="text-gray-600 mb-4">Admin-Bereich nur für Mannschaftsführer.</p>
-        <p className="text-sm text-gray-400 mb-4">Bitte zuerst als Markus Wages einloggen.</p>
-        <Link href="/" className="text-blue-600 hover:underline">← Zurück zur Startseite</Link>
+      <div className="text-center py-16">
+        <div className="w-16 h-16 bg-dove-700 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">🔒</div>
+        <p className="text-dove-300 mb-2">Nur für Mannschaftsführer.</p>
+        <Link href="/" className="text-accent-cyan font-bold hover:text-white transition-colors">← Zurück</Link>
       </div>
     );
   }
@@ -65,39 +69,39 @@ export default function AdminPage() {
   const alleSpieler = [...spieler].sort((a, b) => a.pos - b.pos);
 
   return (
-    <div>
-      <div className="flex justify-between items-center mb-4">
-        <h2 className="text-xl font-bold text-gray-800">Admin-Übersicht</h2>
-        <Link href="/" className="text-sm text-blue-600 hover:underline">← Spieler-Ansicht</Link>
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h2 className="text-xl font-bold text-white">Admin-Übersicht</h2>
+        <Link href="/" className="text-sm font-bold text-accent-cyan hover:text-white px-3 py-2 rounded-xl hover:bg-dove-700 transition-all">
+          ← Spieler-Ansicht
+        </Link>
       </div>
 
       {/* Zusammenfassung pro Spieltag */}
-      <div className="space-y-2 mb-6">
+      <div className="space-y-3">
         {spieltage.map(st => {
           const zusagen = alleSpieler.filter(s => getStatus(st.id, s.id) === 'ja');
           const unsichere = alleSpieler.filter(s => getStatus(st.id, s.id) === 'unsicher');
           const absagen = alleSpieler.filter(s => getStatus(st.id, s.id) === 'nein');
           const offen = alleSpieler.filter(s => getStatus(st.id, s.id) === '');
           const zuWenig = zusagen.length < 6;
-          const genug = zusagen.length >= 6;
           const gegner = st.heim ? st.gastmannschaft : st.heimmannschaft;
-          const cardClass = zuWenig ? 'bg-red-50 border-red-200' : genug ? 'bg-green-50 border-green-200' : 'bg-white';
 
           return (
-            <div key={st.id} className={`rounded-lg border p-3 ${cardClass}`}>
-              <div className="flex justify-between items-center mb-1">
-                <span className="font-semibold text-sm">
+            <div key={st.id} className="card p-4">
+              <div className="flex justify-between items-center mb-2">
+                <span className="font-bold text-sm text-white">
                   {formatDatum(st.datum)} {st.uhrzeit} · {st.heim ? '🏠' : '🚗'} vs {gegner}
                 </span>
-                <span className={`text-sm font-bold ${zuWenig ? 'text-red-600' : 'text-green-600'}`}>
+                <span className={`badge ${zuWenig ? 'bg-red-500/20 text-red-300' : 'bg-accent-green/20 text-green-300'}`}>
                   {zusagen.length}/6
                 </span>
               </div>
-              <div className="text-xs text-gray-600 space-y-0.5">
-                {zusagen.length > 0 && <p>✅ <span className="text-green-700">{zusagen.map(s => s.name).join(', ')}</span></p>}
-                {unsichere.length > 0 && <p>❓ <span className="text-yellow-700">{unsichere.map(s => s.name).join(', ')}</span></p>}
-                {absagen.length > 0 && <p>❌ <span className="text-red-700">{absagen.map(s => s.name).join(', ')}</span></p>}
-                {offen.length > 0 && <p>— <span className="text-gray-400">{offen.map(s => s.name).join(', ')}</span></p>}
+              <div className="text-xs space-y-1">
+                {zusagen.length > 0 && <p>✅ <span className="text-green-300 font-medium">{zusagen.map(s => s.name).join(', ')}</span></p>}
+                {unsichere.length > 0 && <p>❓ <span className="text-yellow-300 font-medium">{unsichere.map(s => s.name).join(', ')}</span></p>}
+                {absagen.length > 0 && <p>❌ <span className="text-red-300 font-medium">{absagen.map(s => s.name).join(', ')}</span></p>}
+                {offen.length > 0 && <p className="text-dove-400">— {offen.map(s => s.name).join(', ')}</p>}
               </div>
             </div>
           );
@@ -105,53 +109,57 @@ export default function AdminPage() {
       </div>
 
       {/* Matrix-Tabelle */}
-      <h3 className="font-bold text-gray-700 mb-2">Gesamtübersicht</h3>
-      <div className="overflow-x-auto">
-        <table className="text-xs border-collapse w-full">
-          <thead>
-            <tr className="bg-gray-100">
-              <th className="border border-gray-300 px-2 py-1 text-left sticky left-0 bg-gray-100 z-10 min-w-[140px]">Spieler</th>
-              <th className="border border-gray-300 px-1 py-1 text-left w-12">LK</th>
-              <th className="border border-gray-300 px-1 py-1 text-center w-8">K</th>
-              {spieltage.map(st => (
-                <th key={st.id} className="border border-gray-300 px-1 py-1 text-center min-w-[50px]">
-                  <div>{formatKurz(st.datum)}</div>
-                  <div className="text-[10px] text-gray-400">{st.heim ? 'H' : 'A'}</div>
-                </th>
-              ))}
-            </tr>
-          </thead>
-          <tbody>
-            {alleSpieler.map(s => (
-              <tr key={s.id} className={s.kern ? '' : 'text-gray-400'}>
-                <td className="border border-gray-300 px-2 py-1 sticky left-0 bg-white z-10 whitespace-nowrap">{s.name}</td>
-                <td className="border border-gray-300 px-1 py-1 text-center">{s.lk}</td>
-                <td className="border border-gray-300 px-1 py-1 text-center">{s.kern ? '✓' : ''}</td>
-                {spieltage.map(st => {
-                  const status = getStatus(st.id, s.id);
-                  return (
-                    <td key={st.id} className={`border border-gray-300 px-1 py-1 text-center ${STATUS_BG[status]}`}>
-                      {STATUS_ICON[status]}
-                    </td>
-                  );
-                })}
-              </tr>
-            ))}
-          </tbody>
-          <tfoot>
-            <tr className="bg-gray-50 font-bold">
-              <td className="border border-gray-300 px-2 py-1 sticky left-0 bg-gray-50 z-10" colSpan={3}>Zusagen</td>
-              {spieltage.map(st => {
-                const count = alleSpieler.filter(s => getStatus(st.id, s.id) === 'ja').length;
-                return (
-                  <td key={st.id} className={`border border-gray-300 px-1 py-1 text-center ${count < 6 ? 'text-red-600 bg-red-50' : 'text-green-600 bg-green-50'}`}>
-                    {count}
-                  </td>
-                );
-              })}
-            </tr>
-          </tfoot>
-        </table>
+      <div>
+        <h3 className="font-bold text-white mb-3">Gesamtübersicht</h3>
+        <div className="card overflow-hidden">
+          <div className="overflow-x-auto">
+            <table className="text-xs w-full">
+              <thead>
+                <tr className="bg-dove-700">
+                  <th className="px-3 py-2.5 text-left sticky left-0 bg-dove-700 z-10 min-w-[130px] font-bold text-dove-200">Spieler</th>
+                  <th className="px-2 py-2.5 text-center w-10 font-bold text-dove-200">LK</th>
+                  <th className="px-2 py-2.5 text-center w-8 font-bold text-dove-200">K</th>
+                  {spieltage.map(st => (
+                    <th key={st.id} className="px-2 py-2.5 text-center min-w-[48px] font-bold text-dove-200">
+                      <div>{formatKurz(st.datum)}</div>
+                      <div className="text-[10px] text-dove-400 font-normal">{st.heim ? 'H' : 'A'}</div>
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-dove-200/20">
+                {alleSpieler.map(s => (
+                  <tr key={s.id} className={`${s.kern ? '' : 'opacity-50'} hover:bg-dove-600/50 transition-colors`}>
+                    <td className="px-3 py-2 sticky left-0 bg-dove-100 z-10 whitespace-nowrap font-bold text-white">{s.name}</td>
+                    <td className="px-2 py-2 text-center text-dove-300">{s.lk}</td>
+                    <td className="px-2 py-2 text-center">{s.kern ? <span className="text-accent-cyan font-bold">✓</span> : ''}</td>
+                    {spieltage.map(st => {
+                      const status = getStatus(st.id, s.id);
+                      return (
+                        <td key={st.id} className={`px-2 py-2 text-center ${STATUS_BG[status]}`}>
+                          {STATUS_ICON[status]}
+                        </td>
+                      );
+                    })}
+                  </tr>
+                ))}
+              </tbody>
+              <tfoot>
+                <tr className="bg-dove-700 font-bold">
+                  <td className="px-3 py-2.5 sticky left-0 bg-dove-700 z-10 text-dove-200" colSpan={3}>Zusagen</td>
+                  {spieltage.map(st => {
+                    const count = alleSpieler.filter(s => getStatus(st.id, s.id) === 'ja').length;
+                    return (
+                      <td key={st.id} className={`px-2 py-2.5 text-center font-bold ${count < 6 ? 'text-red-300' : 'text-green-300'}`}>
+                        {count}
+                      </td>
+                    );
+                  })}
+                </tr>
+              </tfoot>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   );
