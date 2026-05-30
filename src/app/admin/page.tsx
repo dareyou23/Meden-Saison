@@ -85,7 +85,7 @@ export default function AdminPage() {
       <div className="text-center py-16">
         <div className="w-16 h-16 bg-dove-700 rounded-2xl flex items-center justify-center mx-auto mb-4 text-2xl">🔒</div>
         <p className="text-dove-300 mb-2">Nur für Mannschaftsführer.</p>
-        <Link href="/" className="text-accent-cyan font-bold hover:text-white transition-colors">← Zurück</Link>
+        <Link href="/" className="theme-link font-bold hover:opacity-80 transition-colors">← Zurück</Link>
       </div>
     );
   }
@@ -102,8 +102,8 @@ export default function AdminPage() {
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-xl font-bold text-white">Admin-Übersicht</h2>
-        <Link href="/" className="text-sm font-bold text-accent-cyan hover:text-white px-3 py-2 rounded-xl hover:bg-dove-700 transition-all">
+        <h2 className="text-xl font-bold theme-text">Admin-Übersicht</h2>
+        <Link href="/" className="text-sm font-bold theme-link px-3 py-2 rounded-xl hover:opacity-80 transition-all">
           ← Spieler-Ansicht
         </Link>
       </div>
@@ -121,7 +121,7 @@ export default function AdminPage() {
           return (
             <div key={st.id} className="card p-4">
               <div className="flex justify-between items-center mb-2">
-                <span className="font-bold text-sm text-white">
+                <span className="font-bold text-sm theme-text">
                   {formatDatum(st.datum)} {st.uhrzeit} · {st.heim ? '🏠' : '🚗'} vs {gegner}
                 </span>
                 <span className={`badge ${zuWenig ? 'bg-red-500/20 text-red-300' : 'bg-accent-green/20 text-green-300'}`}>
@@ -141,36 +141,36 @@ export default function AdminPage() {
 
       {/* Matrix-Tabelle — klickbar */}
       <div>
-        <h3 className="font-bold text-white mb-1">Gesamtübersicht</h3>
-        <p className="text-xs text-dove-400 mb-3">Klicke auf eine Zelle um den Status zu ändern (— → ✅ → ❓ → ❌ → —)</p>
+        <h3 className="font-bold theme-text mb-1">Gesamtübersicht</h3>
+        <p className="text-xs theme-text-subtle mb-3">Klicke auf eine Zelle um den Status zu ändern (— → ✅ → ❓ → ❌ → —)</p>
         <input
           type="text"
           value={filter}
           onChange={(e) => setFilter(e.target.value)}
           placeholder="Spieler filtern..."
-          className="w-full mb-3 px-3 py-2 rounded-xl bg-dove-700 border border-dove-600 text-white text-sm placeholder-dove-400 focus:outline-none focus:border-accent-cyan"
+          className="w-full mb-3 px-3 py-2 rounded-xl theme-input border text-sm focus:outline-none focus:border-accent-cyan"
         />
         <div className="card overflow-hidden">
           <div className="overflow-auto max-h-[70vh]">
             <table className="text-xs w-full">
               <thead className="sticky top-0 z-20">
-                <tr className="bg-dove-700">
-                  <th className="px-3 py-2.5 text-left sticky left-0 bg-dove-700 z-10 min-w-[130px] font-bold text-dove-200">Spieler</th>
-                  <th className="px-2 py-2.5 text-center w-10 font-bold text-dove-200">LK</th>
-                  <th className="px-2 py-2.5 text-center w-8 font-bold text-dove-200">K</th>
+                <tr className="theme-table-header">
+                  <th className="px-3 py-2.5 text-left sticky left-0 theme-table-header z-10 min-w-[130px] font-bold">Spieler</th>
+                  <th className="px-2 py-2.5 text-center w-10 font-bold">LK</th>
+                  <th className="px-2 py-2.5 text-center w-8 font-bold">K</th>
                   {spieltage.map(st => (
-                    <th key={st.id} className="px-2 py-2.5 text-center min-w-[48px] font-bold text-dove-200">
+                    <th key={st.id} className="px-2 py-2.5 text-center min-w-[48px] font-bold">
                       <div>{formatKurz(st.datum)}</div>
-                      <div className="text-[10px] text-dove-400 font-normal">{st.heim ? 'H' : 'A'}</div>
+                      <div className="text-[10px] theme-text-subtle font-normal">{st.heim ? 'H' : 'A'}</div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody className="divide-y divide-dove-200/20">
                 {gefilterteSpieler.map(s => (
-                  <tr key={s.id} className={`${s.kern ? '' : 'opacity-50'} hover:bg-dove-600/50 transition-colors`}>
-                    <td className="px-3 py-2 sticky left-0 bg-dove-600 z-10 whitespace-nowrap font-bold text-white">{s.name}</td>
-                    <td className="px-2 py-2 text-center text-dove-300">{s.lk}</td>
+                  <tr key={s.id} className={`${s.kern ? '' : 'opacity-50'} theme-table-row-hover transition-colors`}>
+                    <td className="px-3 py-2 sticky left-0 theme-table-cell z-10 whitespace-nowrap font-bold theme-text">{s.name}</td>
+                    <td className="px-2 py-2 text-center theme-text-muted">{s.lk}</td>
                     <td className="px-2 py-2 text-center">{s.kern ? <span className="text-accent-cyan font-bold">✓</span> : ''}</td>
                     {spieltage.map(st => {
                       const status = getStatus(st.id, s.id);
@@ -188,8 +188,8 @@ export default function AdminPage() {
                 ))}
               </tbody>
               <tfoot>
-                <tr className="bg-dove-700 font-bold">
-                  <td className="px-3 py-2.5 sticky left-0 bg-dove-700 z-10 text-dove-200" colSpan={3}>Zusagen</td>
+                <tr className="theme-table-header font-bold">
+                  <td className="px-3 py-2.5 sticky left-0 theme-table-header z-10" colSpan={3}>Zusagen</td>
                   {spieltage.map(st => {
                     const count = alleSpieler.filter(s => getStatus(st.id, s.id) === 'ja').length;
                     return (

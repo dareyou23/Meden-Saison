@@ -102,25 +102,25 @@ export default function HomePage() {
     return (
       <div className="space-y-6">
         <div>
-          <h2 className="text-2xl font-bold text-white">Wer bist du?</h2>
-          <p className="text-sm text-dove-300 mt-1">Wähle deinen Namen aus</p>
+          <h2 className="text-2xl font-bold theme-text">Wer bist du?</h2>
+          <p className="text-sm theme-text-muted mt-1">Wähle deinen Namen aus</p>
         </div>
 
         <div>
-          <p className="text-xs font-bold text-accent-cyan uppercase tracking-wider mb-3">Kern-Mannschaft</p>
+          <p className="text-xs font-bold theme-link uppercase tracking-wider mb-3">Kern-Mannschaft</p>
           <div className="grid grid-cols-2 gap-3">
             {kernSpieler.map(s => (
               <button type="button" key={s.id} onClick={() => selectPlayer(s)}
                 className="card-clickable p-4 text-left">
-                <span className="font-bold text-sm text-white">{s.name}</span>
-                <span className="block text-xs text-dove-200 mt-0.5">LK {s.lk}</span>
+                <span className="font-bold text-sm theme-text">{s.name}</span>
+                <span className="block text-xs theme-text-muted mt-0.5">LK {s.lk}</span>
               </button>
             ))}
           </div>
         </div>
 
         <button type="button" onClick={() => setShowAlle(!showAlle)}
-          className="text-sm text-accent-cyan font-bold hover:text-white transition-colors">
+          className="text-sm theme-link font-bold hover:opacity-80 transition-colors">
           {showAlle ? 'Weniger anzeigen ↑' : `Weitere Spieler (${restSpieler.length}) ↓`}
         </button>
 
@@ -129,8 +129,8 @@ export default function HomePage() {
             {restSpieler.map(s => (
               <button type="button" key={s.id} onClick={() => selectPlayer(s)}
                 className="card-clickable p-4 text-left opacity-70 hover:opacity-100">
-                <span className="font-bold text-sm text-white">{s.name}</span>
-                <span className="block text-xs text-dove-200 mt-0.5">LK {s.lk}</span>
+                <span className="font-bold text-sm theme-text">{s.name}</span>
+                <span className="block text-xs theme-text-muted mt-0.5">LK {s.lk}</span>
               </button>
             ))}
           </div>
@@ -144,17 +144,17 @@ export default function HomePage() {
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-xl font-bold text-white">Hallo {currentPlayer.name}</h2>
-          <p className="text-xs text-dove-300">Tippe auf deinen Status pro Spieltag</p>
+          <h2 className="text-xl font-bold theme-text">Hallo {currentPlayer.name}</h2>
+          <p className="text-xs theme-text-subtle">Tippe auf deinen Status pro Spieltag</p>
         </div>
         <button type="button" onClick={() => { setCurrentPlayer(null); localStorage.removeItem('meden_current_player_id'); }}
-          className="text-sm font-bold text-accent-cyan hover:text-white px-3 py-2 rounded-xl hover:bg-dove-600 transition-all">
+          className="text-sm font-bold theme-link px-3 py-2 rounded-xl hover:opacity-80 transition-all">
           Wechseln
         </button>
       </div>
 
       {currentPlayer.id === 's61' && (
-        <a href="/admin" className="inline-flex items-center gap-1.5 text-sm text-accent-cyan font-bold hover:text-white transition-colors">
+        <a href="/admin" className="inline-flex items-center gap-1.5 text-sm theme-link font-bold hover:opacity-80 transition-colors">
           📊 Admin-Übersicht
         </a>
       )}
@@ -162,7 +162,7 @@ export default function HomePage() {
       {/* Spieltage — aktive oben, vergangene unten */}
       {(() => {
         const now = new Date();
-        const cutoff = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000); // 2 Tage nach Termin
+        const cutoff = new Date(now.getTime() - 2 * 24 * 60 * 60 * 1000);
         const aktive = spieltage.filter(st => new Date(st.datum + 'T23:59:59') >= cutoff);
         const vergangene = spieltage.filter(st => new Date(st.datum + 'T23:59:59') < cutoff);
 
@@ -175,42 +175,42 @@ export default function HomePage() {
 
           return (
             <div key={st.id} className={`card p-5 ${istVergangen ? 'opacity-50' : ''}`}>
-              {/* Spieltag-Info — eine Zeile */}
+              {/* Spieltag-Info */}
               <div className="flex justify-between items-center mb-4">
-                <div className="flex items-center gap-2 text-lg font-bold text-white">
-                  <span className="text-dove-200">{st.heim ? <HomeIcon /> : <AwayIcon />}</span>
+                <div className="flex items-center gap-2 text-lg font-bold theme-text">
+                  <span className="theme-text-muted">{st.heim ? <HomeIcon /> : <AwayIcon />}</span>
                   <span>{formatDatum(st.datum)} · {st.uhrzeit}</span>
-                  <span className="text-dove-300">vs</span>
-                  <span className="text-accent-cyan">{gegner}</span>
-                  {istVergangen && <span className="text-xs text-dove-400 font-normal ml-1">gespielt</span>}
+                  <span className="theme-text-subtle">vs</span>
+                  <span className="theme-link">{gegner}</span>
+                  {istVergangen && <span className="text-xs theme-text-subtle font-normal ml-1">gespielt</span>}
                 </div>
-                <span className={`badge text-sm ${zuWenig ? 'bg-accent-red/20 text-red-300 border border-red-400/30' : 'bg-accent-green/20 text-green-300 border border-green-400/30'}`}>
+                <span className={`badge text-sm ${zuWenig ? 'bg-accent-red/20 text-red-500 border border-red-400/30' : 'bg-accent-green/20 text-green-600 border border-green-400/30'}`}>
                   {zusagen.length}/6
                 </span>
               </div>
 
-              {/* Status-Buttons — nur bei aktiven Spieltagen */}
+              {/* Status-Buttons */}
               {!istVergangen && (
                 <div className="flex gap-2.5 mb-4">
                   <button type="button"
                     onClick={() => { setVerfuegbarkeitHandler(st.id, 'ja'); downloadICS(st); }}
                     className={`status-btn ${myStatus === 'ja'
-                      ? 'bg-accent-green text-white border-green-400/50'
-                      : 'bg-dove-600 text-green-300 hover:bg-dove-400 hover:text-green-200'}`}>
+                      ? 'bg-accent-green text-white'
+                      : 'theme-btn-green'}`}>
                     💪 Dabei
                   </button>
                   <button type="button"
                     onClick={() => setVerfuegbarkeitHandler(st.id, 'unsicher')}
                     className={`status-btn ${myStatus === 'unsicher'
-                      ? 'bg-accent-yellow text-white border-yellow-400/50'
-                      : 'bg-dove-600 text-yellow-300 hover:bg-dove-400 hover:text-yellow-200'}`}>
+                      ? 'bg-accent-yellow text-white'
+                      : 'theme-btn-yellow'}`}>
                     🤷 Unsicher
                   </button>
                   <button type="button"
                     onClick={() => setVerfuegbarkeitHandler(st.id, 'nein')}
                     className={`status-btn ${myStatus === 'nein'
-                      ? 'bg-accent-red text-white border-red-400/50'
-                      : 'bg-dove-600 text-red-300 hover:bg-dove-400 hover:text-red-200'}`}>
+                      ? 'bg-accent-red text-white'
+                      : 'theme-btn-red'}`}>
                     👎 Nein
                   </button>
                 </div>
@@ -218,9 +218,9 @@ export default function HomePage() {
 
               {/* Zusagen */}
               {zusagen.length > 0 && (
-                <div className={`pt-3 border-t border-dove-400/40 ${istVergangen ? '' : ''}`}>
-                  <p className="text-xs font-bold text-green-300 uppercase tracking-wider mb-2">Dabei ({zusagen.length})</p>
-                  <p className="text-sm text-white font-medium leading-relaxed">
+                <div className="pt-3 border-t border-dove-400/40">
+                  <p className="text-xs font-bold text-accent-green uppercase tracking-wider mb-2">Dabei ({zusagen.length})</p>
+                  <p className="text-sm theme-text font-medium leading-relaxed">
                     {zusagen.map(s => s.name).join(', ')}
                   </p>
                 </div>
@@ -229,8 +229,8 @@ export default function HomePage() {
               {/* Unsichere */}
               {unsichere.length > 0 && (
                 <div className="mt-3">
-                  <p className="text-xs font-bold text-yellow-300 uppercase tracking-wider mb-2">Unsicher ({unsichere.length})</p>
-                  <p className="text-sm text-dove-100 font-medium leading-relaxed">
+                  <p className="text-xs font-bold text-accent-yellow uppercase tracking-wider mb-2">Unsicher ({unsichere.length})</p>
+                  <p className="text-sm theme-text-muted font-medium leading-relaxed">
                     {unsichere.map(s => s.name).join(', ')}
                   </p>
                 </div>
@@ -247,7 +247,7 @@ export default function HomePage() {
 
             {vergangene.length > 0 && (
               <div className="mt-8">
-                <p className="text-xs font-bold text-dove-400 uppercase tracking-wider mb-3">Vergangene Spieltage</p>
+                <p className="text-xs font-bold theme-text-subtle uppercase tracking-wider mb-3">Vergangene Spieltage</p>
                 <div className="space-y-3">
                   {vergangene.map(st => renderSpieltag(st, true))}
                 </div>
