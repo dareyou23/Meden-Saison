@@ -18,6 +18,7 @@ function formatDatum(iso: string) {
 
 type AllVerfuegbarkeiten = Record<string, Record<string, Verfuegbarkeit>>;
 
+const STATUS_CYCLE: Verfuegbarkeit[] = ['', 'ja', 'unsicher', 'nein'];
 const STATUS_ICON: Record<string, string> = { ja: '✅', nein: '❌', unsicher: '❓', '': '—' };
 const STATUS_BG: Record<string, string> = { ja: 'bg-accent-green/10', nein: 'bg-accent-red/10', unsicher: 'bg-accent-yellow/10', '': '' };
 
@@ -27,6 +28,7 @@ export default function AdminPage() {
   const [data, setData] = useState<AllVerfuegbarkeiten>({});
   const [loaded, setLoaded] = useState(false);
   const [authorized, setAuthorized] = useState(false);
+  const [filter, setFilter] = useState('');
 
   useEffect(() => {
     async function load() {
@@ -45,6 +47,32 @@ export default function AdminPage() {
     }
     load();
   }, []);
+
+  const toggleStatus = async (spieltagId: string, spielerId: string) => {
+    const current = getStatus(spieltagId, spielerId);
+    const currentIndex = STATUS_CYCLE.indexOf(current);
+    const nextStatus = STATUS_CYCLE[(currentIndex + 1) % STATUS_CYCLE.length];
+
+    // Optimistic update
+    setData(prev => {
+      const next = { ...prev };
+      if (!next[spieltagId]) next[spieltagId] = {};
+      next[spieltagId] = { ...next[spieltagId], [spielerId]: nextStatus };
+      return next;
+    });
+
+    // API call
+    const result = await api.setVerfuegbarkeit(spieltagId, spielerId, nextStatus);
+    if (!result.success) {
+      // Rollback
+      setData(prev => {
+        const rollback = { ...prev };
+        if (!rollback[spieltagId]) rollback[spieltagId] = {};
+        rollback[spieltagId] = { ...rollback[spieltagId], [spielerId]: current };
+        return rollback;
+      });
+    }
+  };
 
   if (!loaded) return (
     <div className="flex items-center justify-center py-20">
@@ -67,6 +95,9 @@ export default function AdminPage() {
   };
 
   const alleSpieler = [...spieler].sort((a, b) => a.pos - b.pos);
+  const gefilterteSpieler = alleSpieler.filter(s => 
+    s.name.toLowerCase().includes(filter.toLowerCase())
+  );
 
   return (
     <div className="space-y-6">
@@ -108,13 +139,21 @@ export default function AdminPage() {
         })}
       </div>
 
-      {/* Matrix-Tabelle */}
+      {/* Matrix-Tabelle — klickbar */}
       <div>
-        <h3 className="font-bold text-white mb-3">Gesamtübersicht</h3>
+        <h3 className="font-bold text-white mb-1">Gesamtübersicht</h3>
+        <p className="text-xs text-dove-400 mb-3">Klicke auf eine Zelle um den Status zu ändern (— → ✅ → ❓ → ❌ → —)</p>
+        <input
+          type="text"
+          value={filter}
+          onChange={(e) => setFilter(e.target.value)}
+          placeholder="Spieler filtern..."
+          className="w-full mb-3 px-3 py-2 rounded-xl bg-dove-700 border border-dove-600 text-white text-sm placeholder-dove-400 focus:outline-none focus:border-accent-cyan"
+        />
         <div className="card overflow-hidden">
-          <div className="overflow-x-auto">
+          <div className="overflow-auto max-h-[70vh]">
             <table className="text-xs w-full">
-              <thead>
+              <thead className="sticky top-0 z-20">
                 <tr className="bg-dove-700">
                   <th className="px-3 py-2.5 text-left sticky left-0 bg-dove-700 z-10 min-w-[130px] font-bold text-dove-200">Spieler</th>
                   <th className="px-2 py-2.5 text-center w-10 font-bold text-dove-200">LK</th>
@@ -128,15 +167,19 @@ export default function AdminPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-dove-200/20">
-                {alleSpieler.map(s => (
+                {gefilterteSpieler.map(s => (
                   <tr key={s.id} className={`${s.kern ? '' : 'opacity-50'} hover:bg-dove-600/50 transition-colors`}>
-                    <td className="px-3 py-2 sticky left-0 bg-dove-100 z-10 whitespace-nowrap font-bold text-white">{s.name}</td>
+                    <td className="px-3 py-2 sticky left-0 bg-dove-600 z-10 whitespace-nowrap font-bold text-white">{s.name}</td>
                     <td className="px-2 py-2 text-center text-dove-300">{s.lk}</td>
                     <td className="px-2 py-2 text-center">{s.kern ? <span className="text-accent-cyan font-bold">✓</span> : ''}</td>
                     {spieltage.map(st => {
                       const status = getStatus(st.id, s.id);
                       return (
-                        <td key={st.id} className={`px-2 py-2 text-center ${STATUS_BG[status]}`}>
+                        <td key={st.id}
+                          onClick={() => toggleStatus(st.id, s.id)}
+                          className={`px-2 py-2 text-center cursor-pointer select-none
+                            hover:bg-dove-400/50 hover:scale-110 transition-all
+                            ${STATUS_BG[status]}`}>
                           {STATUS_ICON[status]}
                         </td>
                       );
