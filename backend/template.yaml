@@ -29,6 +29,8 @@ Resources:
       BillingMode: PAY_PER_REQUEST
       PointInTimeRecoverySpecification:
         PointInTimeRecoveryEnabled: true
+      SSESpecification:
+        SSEEnabled: true
       AttributeDefinitions:
         - AttributeName: PK
           AttributeType: S
@@ -64,6 +66,11 @@ Resources:
         AllowOrigin: "'*'"
         AllowCredentials: false
         MaxAge: "'600'"
+      MethodSettings:
+        - ResourcePath: "/*"
+          HttpMethod: "*"
+          ThrottlingRateLimit: 50
+          ThrottlingBurstLimit: 100
       GatewayResponses:
         DEFAULT_4XX:
           ResponseParameters:
@@ -165,6 +172,76 @@ Resources:
         - DynamoDBReadPolicy:
             TableName: !Ref MedenSaisonTable
 
+  # --- Abrechnung ---
+
+  # POST /abrechnung
+  CreateAbrechnungFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/abrechnung.createAbrechnung
+      Events:
+        CreateAbrechnung:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /abrechnung
+            Method: post
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # GET /abrechnung/{spieltagId}
+  GetAbrechnungFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/abrechnung.getAbrechnung
+      Events:
+        GetAbrechnung:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /abrechnung/{spieltagId}
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # DELETE /abrechnung/{spieltagId}/{kostenId}
+  DeleteAbrechnungFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/abrechnung.deleteAbrechnung
+      Events:
+        DeleteAbrechnung:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /abrechnung/{spieltagId}/{kostenId}
+            Method: delete
+      Policies:
+        - DynamoDBCrudPolicy:
+            TableName: !Ref MedenSaisonTable
+
+  # GET /abrechnung/alle
+  GetAlleAbrechnungFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      CodeUri: dist/
+      Handler: handlers/abrechnung.getAlleAbrechnung
+      Events:
+        GetAlleAbrechnung:
+          Type: Api
+          Properties:
+            RestApiId: !Ref MedenSaisonApi
+            Path: /abrechnung/alle
+            Method: get
+      Policies:
+        - DynamoDBReadPolicy:
+            TableName: !Ref MedenSaisonTable
+
   # S3 Backup Bucket
   BackupBucket:
     Type: AWS::S3::Bucket
@@ -181,6 +258,10 @@ Resources:
         BlockPublicPolicy: true
         IgnorePublicAcls: true
         RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
 
   # Tägliches Backup (03:00 UTC = 04:00/05:00 MEZ/MESZ)
   BackupFunction:

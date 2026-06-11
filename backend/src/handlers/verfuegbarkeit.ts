@@ -56,8 +56,9 @@ export async function getVerfuegbarkeit(event: APIGatewayProxyEvent): Promise<AP
 // GET /verfuegbarkeit — alle Verfügbarkeiten aller Spieltage (für Admin-Übersicht)
 export async function getAllVerfuegbarkeit(_event: APIGatewayProxyEvent): Promise<APIGatewayProxyResult> {
   try {
-    // Für jeden Spieltag die Verfügbarkeiten laden
-    const spieltagIds = ['st1', 'st2', 'st3', 'st4', 'st5'];
+    // Spieltage dynamisch aus DB laden
+    const spieltage = await queryItems('SAISON#sommer2026', 'SPIELTAG#');
+    const spieltagIds = spieltage.map(st => st.spieltagId as string);
     const result: Record<string, Record<string, string>> = {};
 
     for (const stId of spieltagIds) {

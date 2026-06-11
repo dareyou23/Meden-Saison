@@ -18,63 +18,14 @@ export const SPIELTAGE: Spieltag[] = [
 
 export interface Spieler {
   id: string;
-  pos: number;         // Setzlisten-Position
-  name: string;        // Vorname Nachname
+  pos: number;
+  name: string;
   lk: string;
   kern: boolean;
 }
 
-// Sortiert nach Setzlisten-Position (Nr aus der Originalliste)
-export const SPIELER: Spieler[] = [
-  // Kern-Spieler (WhatsApp-Gruppe), in Setzlisten-Reihenfolge
-  { id: 's27', pos: 1, name: 'Bernd Brinkmann', lk: '19,0', kern: true },
-  { id: 's51', pos: 2, name: 'Peter Pelko', lk: '22,8', kern: true },
-  { id: 's53', pos: 3, name: 'Jörg Fischer', lk: '23,0', kern: true },
-  { id: 's61', pos: 4, name: 'Markus Wages', lk: '23,5', kern: true },
-  { id: 's69', pos: 5, name: 'Holger von der Linden', lk: '24,6', kern: true },
-  { id: 's59', pos: 6, name: 'Frank Bittel', lk: '23,4', kern: true },
-  { id: 's57', pos: 7, name: 'Gregor Franzmann', lk: '23,1', kern: true },
-  { id: 's63', pos: 8, name: 'Dirk Bisping', lk: '24,2', kern: true },
-  { id: 's60', pos: 9, name: 'Peter Weber', lk: '23,4', kern: true },
-  { id: 's76', pos: 10, name: 'Stefan Brimmers', lk: '25,0', kern: true },
-  { id: 's88', pos: 11, name: 'Daniel Soltek', lk: '25,0', kern: true },
-  { id: 's89', pos: 12, name: 'Michael Kartschewski', lk: '25,0', kern: true },
-  { id: 's62', pos: 13, name: 'Bernhard Wünsche', lk: '23,7', kern: true },
-  // Weitere Spieler, nach Position
-  { id: 's25', pos: 25, name: 'Peter Missbach', lk: '18,9', kern: false },
-  { id: 's26', pos: 26, name: 'Klaus Wiemann', lk: '18,9', kern: false },
-  { id: 's28', pos: 28, name: 'Stefan Reitenberger', lk: '19,0', kern: false },
-  { id: 's29', pos: 29, name: 'Stefan Förster', lk: '19,1', kern: false },
-  { id: 's30', pos: 30, name: 'Hans-Walter Buckels', lk: '19,2', kern: false },
-  { id: 's31', pos: 31, name: 'Michael Künzel', lk: '19,4', kern: false },
-  { id: 's32', pos: 32, name: 'Markus Habrich', lk: '19,6', kern: false },
-  { id: 's33', pos: 33, name: 'Michael Conrad', lk: '20,1', kern: false },
-  { id: 's34', pos: 34, name: 'Dirk Hermes', lk: '20,1', kern: false },
-  { id: 's35', pos: 35, name: 'Andreas Köpp', lk: '20,9', kern: false },
-  { id: 's36', pos: 36, name: 'Christian Riedel', lk: '21,0', kern: false },
-  { id: 's37', pos: 37, name: 'Murat Yesil', lk: '21,0', kern: false },
-  { id: 's38', pos: 38, name: 'Peter Rentergent', lk: '21,1', kern: false },
-  { id: 's39', pos: 39, name: 'Uwe Holländer', lk: '21,2', kern: false },
-  { id: 's40', pos: 40, name: 'Stefan Raabe', lk: '21,3', kern: false },
-  { id: 's41', pos: 41, name: 'Jonny Bartel', lk: '21,6', kern: false },
-  { id: 's42', pos: 42, name: 'Frank Ritter', lk: '21,6', kern: false },
-  { id: 's43', pos: 43, name: 'Thomas Döring', lk: '21,7', kern: false },
-  { id: 's44', pos: 44, name: 'Frank Bresser', lk: '22,1', kern: false },
-  { id: 's45', pos: 45, name: 'Klaus Mirschenz', lk: '22,1', kern: false },
-  { id: 's46', pos: 46, name: 'Peter Keutmann', lk: '22,4', kern: false },
-  { id: 's47', pos: 47, name: 'Manfred Zacheja', lk: '22,4', kern: false },
-  { id: 's48', pos: 48, name: 'Michael Siems', lk: '22,6', kern: false },
-  { id: 's49', pos: 49, name: 'Christian Hansen', lk: '22,5', kern: false },
-  { id: 's50', pos: 50, name: 'Stefan Michels', lk: '22,7', kern: false },
-  { id: 's52', pos: 52, name: 'Peter Frackowiak', lk: '22,8', kern: false },
-  { id: 's55', pos: 55, name: 'Hans Dietrich Heimes', lk: '23,1', kern: false },
-  { id: 's56', pos: 56, name: 'Rolf Hüsgen', lk: '23,1', kern: false },
-  { id: 's65', pos: 65, name: 'Carsten Wendt', lk: '24,4', kern: false },
-  { id: 's66', pos: 66, name: 'Stefan Golf', lk: '24,4', kern: false },
-  { id: 's67', pos: 67, name: 'Hakan Yildiz', lk: '24,4', kern: false },
-  { id: 's68', pos: 68, name: 'Uwe Grutz', lk: '24,4', kern: false },
-  { id: 's70', pos: 70, name: 'Ulrich Holtmann', lk: '24,8', kern: false },
-  { id: 's71', pos: 71, name: 'Daniel Schreiber', lk: '24,8', kern: false },
-];
+// HINWEIS: Spielerdaten kommen aus der Datenbank (API).
+// Diese Datei enthält nur noch die Typ-Definitionen und Spieltage.
+// Das SPIELER-Array wurde aus Datenschutzgründen entfernt.
 
 export type Verfuegbarkeit = 'ja' | 'nein' | 'unsicher' | '';

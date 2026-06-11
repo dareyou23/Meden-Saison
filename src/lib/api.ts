@@ -6,20 +6,28 @@ interface ApiResponse<T> {
   error?: string;
 }
 
-async function request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
-  try {
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
-      ...options,
-      headers: {
-        'Content-Type': 'application/json',
-        ...(options.headers as Record<string, string> || {}),
-      },
-    });
-    return await response.json();
-  } catch (error) {
-    console.error('API error:', error);
-    return { success: false, error: 'Server nicht erreichbar' };
+async function request<T>(endpoint: string, options: RequestInit = {}, retries = 2): Promise<ApiResponse<T>> {
+  for (let attempt = 0; attempt <= retries; attempt++) {
+    try {
+      const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+        ...options,
+        cache: 'no-store',
+        headers: {
+          'Content-Type': 'application/json',
+          ...(options.headers as Record<string, string> || {}),
+        },
+      });
+      return await response.json();
+    } catch (error) {
+      console.error(`API error (Versuch ${attempt + 1}/${retries + 1}):`, error);
+      if (attempt < retries) {
+        await new Promise(r => setTimeout(r, 500 * (attempt + 1)));
+        continue;
+      }
+      return { success: false, error: 'Server nicht erreichbar' };
+    }
   }
+  return { success: false, error: 'Server nicht erreichbar' };
 }
 
 export interface Spieltag {

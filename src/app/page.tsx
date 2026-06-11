@@ -62,16 +62,26 @@ export default function HomePage() {
   const setVerfuegbarkeitHandler = async (spieltagId: string, status: Verfuegbarkeit) => {
     if (!currentPlayer) return;
     const prevStatus = getStatus(spieltagId, currentPlayer.id);
-    const next = { ...data };
-    if (!next[spieltagId]) next[spieltagId] = {};
-    next[spieltagId][currentPlayer.id] = status;
-    setData(next);
+
+    // Optimistic update mit korrektem immutable State
+    setData(prev => ({
+      ...prev,
+      [spieltagId]: {
+        ...(prev[spieltagId] || {}),
+        [currentPlayer.id]: status,
+      },
+    }));
+
     const result = await api.setVerfuegbarkeit(spieltagId, currentPlayer.id, status);
     if (!result.success) {
-      const rollback = { ...data };
-      if (!rollback[spieltagId]) rollback[spieltagId] = {};
-      rollback[spieltagId][currentPlayer.id] = prevStatus;
-      setData(rollback);
+      // Rollback mit funktionalem Update (kein stale closure)
+      setData(prev => ({
+        ...prev,
+        [spieltagId]: {
+          ...(prev[spieltagId] || {}),
+          [currentPlayer.id]: prevStatus,
+        },
+      }));
       alert('Fehler beim Speichern. Bitte nochmal versuchen.');
     }
   };

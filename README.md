@@ -4,7 +4,7 @@ Spieltag-Verfügbarkeitsabfrage für die Medensaison Köln-Leverkusen Sommer 202
 
 ## Übersicht
 
-Spieler können ihre Verfügbarkeit für die 5 Spieltage der Saison eintragen (Dabei / Unsicher / Nein). Bei "Dabei" wird automatisch ein ICS-Kalendereintrag angeboten. Der Mannschaftsführer (Markus Wages) hat eine Admin-Übersicht mit Matrix aller Spieler × Spieltage.
+Spieler können ihre Verfügbarkeit für die 5 Spieltage der Saison eintragen (Dabei / Unsicher / Nein). Bei "Dabei" wird automatisch ein ICS-Kalendereintrag angeboten. Der Mannschaftsführer hat eine Admin-Übersicht mit Matrix aller Spieler × Spieltage.
 
 ## Architektur
 
@@ -61,7 +61,7 @@ node seed-data.js
 
 - **Port**: 3002 (`npm run dev -p 3002`)
 - **Spieler-Ansicht** (`/`): Spielerauswahl → Spieltage mit Verfügbarkeits-Buttons
-- **Admin-Ansicht** (`/admin`): Nur für Markus Wages (s61), Matrix + Zusammenfassung
+- **Admin-Ansicht** (`/admin`): Nur für Mannschaftsführer (s61), Matrix + Zusammenfassung
 - **ICS-Download**: Bei "Dabei" wird Kalendereintrag angeboten (Mobile: direkte Kalender-Integration)
 
 ### Environment
@@ -73,7 +73,7 @@ NEXT_PUBLIC_API_URL=https://kerb0sbhb2.execute-api.eu-central-1.amazonaws.com/pr
 ## Spieler
 
 13 Kern-Spieler (WhatsApp-Gruppe) + 34 weitere Spieler der 4. Mannschaft.
-Kern-Reihenfolge: Bernd, Peter Pelko, Jörg, Markus, Holger, Frank, Gregor, Dirk, Peter Weber, Stefan, Daniel, Michael K., Bernhard.
+13 Kern-Spieler sind in der WhatsApp-Gruppe, die restlichen 34 sind weitere Spieler der 4. Mannschaft.
 
 ## Backup-Strategie
 

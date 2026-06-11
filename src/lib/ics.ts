@@ -33,23 +33,13 @@ export function generateICS(spieltag: Spieltag): string {
 
 export function downloadICS(spieltag: Spieltag) {
   const ics = generateICS(spieltag);
-
-  // Auf iOS/Android: data-URI öffnet direkt die Kalender-App
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
-  const isAndroid = /Android/.test(navigator.userAgent);
-
-  if (isIOS || isAndroid) {
-    // Mobile: window.open mit data-URI → Kalender-App öffnet sich
-    const dataUri = 'data:text/calendar;charset=utf-8,' + encodeURIComponent(ics);
-    window.open(dataUri, '_blank');
-  } else {
-    // Desktop: normaler Download
-    const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `meden-spieltag-${spieltag.nr}.ics`;
-    a.click();
-    URL.revokeObjectURL(url);
-  }
+  const blob = new Blob([ics], { type: 'text/calendar;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `meden-spieltag-${spieltag.nr}.ics`;
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  URL.revokeObjectURL(url);
 }
